@@ -1,6 +1,11 @@
 import React from 'react';
 
-const Welcome: React.FC = () => {
+// 定义组件的 props 类型
+interface WelcomeProps {
+    onStartAnalysis: () => void;  // 点击"开始分析"按钮时的回调函数
+}
+
+const Welcome: React.FC<WelcomeProps> = ({ onStartAnalysis }) => {
     return (
         <div className="w-full flex items-center justify-center min-h-screen">
             <div className="max-w-4xl px-4 py-12 w-full">
@@ -43,7 +48,7 @@ const Welcome: React.FC = () => {
                     <div className="text-center">
                         <button
                             className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105"
-                            onClick={() => console.log('开始分析')}
+                            onClick={onStartAnalysis}  // 修改这里，使用传入的回调函数
                         >
                             开始我的命盘分析
                         </button>
