@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.backend/light_of_destiny_virture_environment/
+
