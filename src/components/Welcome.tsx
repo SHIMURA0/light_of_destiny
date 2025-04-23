@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Star, Moon, Sun, Menu, X, ChevronRight, Heart, Briefcase, DollarSign, Users } from 'lucide-react';
+import { useUserData } from '../contexts/UserDataContext'; // 导入 useUserData
 
 // 定义组件的 props 类型
 interface WelcomeProps {
@@ -879,9 +880,15 @@ const Footer = () => {
 
 const Welcome: React.FC<WelcomeProps> = ({ onStartAnalysis }) => {
     const navigate = useNavigate();
+    const { clearUserData } = useUserData(); // 添加 clearUserData
 
     // 创建一个处理导航的函数
     const handleStartAnalysis = () => {
+
+        // 在导航前清除用户数据
+        clearUserData();
+        sessionStorage.clear();
+
         if (onStartAnalysis) {
             onStartAnalysis(); // 如果传入了回调函数，则使用回调
         } else {
@@ -890,6 +897,10 @@ const Welcome: React.FC<WelcomeProps> = ({ onStartAnalysis }) => {
     };
 
     useEffect(() => {
+        // 页面加载时清除用户数据
+        clearUserData();
+        sessionStorage.clear();
+
         // 添加页面平滑滚动
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

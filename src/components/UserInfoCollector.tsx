@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
+import {useUserData} from '../contexts/UserDataContext';
 import {
     Calendar, Clock, MapPin, User, Users,
     Star, ArrowRight, CheckCircle
@@ -22,8 +23,21 @@ interface UserInfoCollectorProps {
     onComplete?: (formData: FormData) => void;
 }
 
-const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplete }) => {
+const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({onBack, onComplete}) => {
     const navigate = useNavigate();
+    const {userData, setUserData, clearUserData} = useUserData();
+
+    // 修改初始化逻辑
+    useEffect(() => {
+        // 清除之前的临时表单数据
+        sessionStorage.removeItem('tempFormData');
+        sessionStorage.removeItem('formStep');
+
+        // 仅在没有用户数据时才清空
+        if (!userData.name) {
+            clearUserData();
+        }
+    }, [clearUserData, userData]);
 
     const [step, setStep] = useState(() => {
         const savedStep = sessionStorage.getItem('formStep');
@@ -42,12 +56,12 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
         }
 
         return {
-            name: "",
-            gender: "",
-            birthDate: "",
-            birthTime: "",
-            birthPlace: "",
-            anonymous: false
+            name: userData.name || "",
+            gender: userData.gender || "",
+            birthDate: userData.birthDate || "",
+            birthTime: userData.birthTime || "",
+            birthPlace: userData.birthPlace || "",
+            anonymous: userData.anonymous || false
         };
     });
 
@@ -63,9 +77,9 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
     }, [step]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
+        const {name, value, type} = e.target;
 
-        // 处理复选框  
+        // 处理复选框
         if (type === "checkbox") {
             const checked = (e.target as HTMLInputElement).checked;
             setFormData(prev => ({
@@ -73,7 +87,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                 [name]: checked
             }));
         } else {
-            // 处理普通输入  
+            // 处理普通输入
             setFormData(prev => ({
                 ...prev,
                 [name]: value
@@ -104,6 +118,12 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
 
         try {
             const response = await axios.post(`${API_BASE_URL}/api/user-info`, formData);
+
+            // 更新 Context 中的用户数据，但不清空
+            setUserData(prevData => ({
+                ...prevData,
+                ...formData  // 只更新变动的字段
+            }));
 
             localStorage.setItem('userReport', JSON.stringify(response.data));
 
@@ -147,8 +167,10 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
 
     const isCurrentStepValid = validateCurrentStep();
 
+
     return (
-        <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black">
+        <div
+            className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-black">
             <div className="max-w-2xl w-full px-4 py-8">
                 <header className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-white">命运之光</h1>
@@ -160,7 +182,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                     <div className="absolute h-1 bg-gray-700 top-1/2 left-0 right-0 -translate-y-1/2 z-0"></div>
                     <div
                         className="absolute h-1 bg-purple-500 top-1/2 left-0 right-0 -translate-y-1/2 z-0"
-                        style={{ width: `${(step - 1) * 25}%` }}
+                        style={{width: `${(step - 1) * 25}%`}}
                     ></div>
 
                     {[1, 2, 3, 4].map((s) => (
@@ -169,7 +191,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                             className={`w-10 h-10 rounded-full flex items-center justify-center z-10   
                                 ${step >= s ? 'bg-purple-500 text-white' : 'bg-gray-700 text-gray-400'}`}
                         >
-                            {step > s ? <CheckCircle size={20} /> : s}
+                            {step > s ? <CheckCircle size={20}/> : s}
                         </div>
                     ))}
                 </div>
@@ -188,7 +210,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                             <form className="space-y-6">
                                 <div>
                                     <label className="flex items-center mb-2 text-white">
-                                        <User size={18} className="mr-2" />
+                                        <User size={18} className="mr-2"/>
                                         <span>姓名</span>
                                     </label>
                                     <input
@@ -203,7 +225,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
 
                                 <div>
                                     <label className="flex items-center mb-2 text-white">
-                                        <Users size={18} className="mr-2" />
+                                        <Users size={18} className="mr-2"/>
                                         <span>性别</span>
                                     </label>
                                     <div className="flex space-x-4">
@@ -252,7 +274,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                                                 : "bg-purple-600/50 cursor-not-allowed text-white/50"
                                         }`}
                                     >
-                                        下一步 <ArrowRight size={16} className="ml-2" />
+                                        下一步 <ArrowRight size={16} className="ml-2"/>
                                     </button>
                                 </div>
                             </form>
@@ -266,7 +288,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                             <form className="space-y-6">
                                 <div>
                                     <label className="flex items-center mb-2 text-white">
-                                        <Calendar size={18} className="mr-2" />
+                                        <Calendar size={18} className="mr-2"/>
                                         出生日期
                                     </label>
                                     <input
@@ -280,7 +302,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
 
                                 <div>
                                     <label className="flex items-center mb-2 text-white">
-                                        <Clock size={18} className="mr-2" />
+                                        <Clock size={18} className="mr-2"/>
                                         出生时间
                                     </label>
                                     <input
@@ -310,7 +332,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                                                 : "bg-purple-600/50 cursor-not-allowed text-white/50"
                                         }`}
                                     >
-                                        下一步 <ArrowRight size={16} className="ml-2" />
+                                        下一步 <ArrowRight size={16} className="ml-2"/>
                                     </button>
                                 </div>
                             </form>
@@ -324,7 +346,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                             <form className="space-y-6">
                                 <div>
                                     <label className="flex items-center mb-2 text-white">
-                                        <MapPin size={18} className="mr-2" />
+                                        <MapPin size={18} className="mr-2"/>
                                         出生地
                                     </label>
                                     <input
@@ -355,7 +377,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                                                 : "bg-purple-600/50 cursor-not-allowed text-white/50"
                                         }`}
                                     >
-                                        生成报告 <Star size={16} className="ml-2" />
+                                        生成报告 <Star size={16} className="ml-2"/>
                                     </button>
                                 </div>
                             </form>
@@ -378,7 +400,7 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({ onBack, onComplet
                         <div className="text-center py-12">
                             <div className="flex justify-center mb-6">
                                 <div className="h-16 w-16 bg-purple-500 rounded-full flex items-center justify-center">
-                                    <CheckCircle size={32} color="white" />
+                                    <CheckCircle size={32} color="white"/>
                                 </div>
                             </div>
                             <h2 className="text-xl font-semibold mb-3 text-white">您的命盘分析已完成！</h2>
