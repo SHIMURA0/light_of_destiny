@@ -23,7 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-.backend/light_of_destiny_virture_environment/
-
-.backend/.env
+backend/light_of_destiny_virture_environment/
+backend/.env
 
