@@ -25,4 +25,5 @@ dist-ssr
 
 backend/light_of_destiny_virture_environment/
 backend/.env
+backend/__pycache__/
 
