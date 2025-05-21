@@ -125,7 +125,8 @@ const UserInfoCollector: React.FC<UserInfoCollectorProps> = ({onBack, onComplete
                 ...formData  // 只更新变动的字段
             }));
 
-            localStorage.setItem('userReport', JSON.stringify(response.data));
+            // 只存储实际的报告数据
+            localStorage.setItem('userReport', JSON.stringify(response.data.data));
 
             if (onComplete) {
                 onComplete(formData);
